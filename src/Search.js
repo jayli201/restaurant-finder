@@ -42,6 +42,50 @@ class Search extends Component {
     this.componentDidMount();
   }
 
+  organizeInfo = () => {
+    // organize the info into a large array
+    const allinfo = [];
+    for (let i = 0; i < this.state.ratings.length; i++) {
+      allinfo.push({
+        name: this.state.restaurants[i],
+        info: {
+          keyword: this.state.keyword,
+          place: this.state.place,
+          price: this.state.prices[i],
+          rating: this.state.ratings[i],
+          latitude: this.state.lat[i],
+          longitude: this.state.long[i],
+          address: this.state.address[i],
+          locationlat: this.state.locationlat,
+          locationlng: this.state.locationlng
+        }
+      });
+    }
+    // change price level to $s
+    for (let i = 0; i < allinfo.length; i++) {
+      if (allinfo[i].info.price === undefined) {
+        allinfo[i].info.price = "undefined";
+      } else {
+        if (allinfo[i].info.price == 1) {
+          allinfo[i].info.price = "$";
+        } else if (allinfo[i].info.price == 2) {
+          allinfo[i].info.price = "$$";
+        } else if (allinfo[i].info.price == 3) {
+          allinfo[i].info.price = "$$$";
+        } else if (allinfo[i].info.price == 4) {
+          allinfo[i].info.price = "$$$$";
+        } else {
+          allinfo[i].info.price = "$$$$$";
+        }
+      }
+    }
+    this.setState({
+      allinfo: allinfo
+    });
+    // to pass data from child to parent (Restaurants)
+    this.props.searchFill(this.state.allinfo);
+  };
+
   componentDidMount() {
     // first get lat and lng from inputted place
     axios
@@ -92,50 +136,7 @@ class Search extends Component {
         this.state.ratings.sort(function(a, b) {
           return b - a;
         });
-        // organize the info into a large array
-        const allinfo = [];
-        for (let i = 0; i < this.state.ratings.length; i++) {
-          allinfo.push({
-            name: restaurants[i],
-            info: {
-              keyword: this.state.keyword,
-              place: this.state.place,
-              price: prices[i],
-              rating: ratings[i],
-              latitude: lat[i],
-              longitude: long[i],
-              address: addresses[i],
-              locationlat: this.state.locationlat,
-              locationlng: this.state.locationlng
-            }
-          });
-        }
-        // change price level to $s
-        for (let i = 0; i < allinfo.length; i++) {
-          if (allinfo[i].info.price === undefined) {
-            allinfo[i].info.price = "undefined";
-          } else {
-            if (allinfo[i].info.price == 1) {
-              allinfo[i].info.price = "$";
-            } else if (allinfo[i].info.price == 2) {
-              allinfo[i].info.price = "$$";
-            } else if (allinfo[i].info.price == 3) {
-              allinfo[i].info.price = "$$$";
-            } else if (allinfo[i].info.price == 4) {
-              allinfo[i].info.price = "$$$$";
-            } else {
-              allinfo[i].info.price = "$$$$$";
-            }
-          }
-        }
-        this.setState({
-          allinfo: allinfo
-        });
-        // to pass data from child to parent
-        this.props.searchFill(this.state.allinfo);
-        console.log(this.state.allinfo);
-        this.state.allinfo.sort((a, b) => a.info.rating - b.info.rating);
-        console.log(this.state.allinfo);
+        this.organizeInfo();
       });
   }
 
@@ -169,11 +170,9 @@ class Search extends Component {
           </Row>
         </Content>
         <Footer style={{ background: "#fde3cf", textAlign: "center" }}>
-          <div>
-            <Button onClick={this.handleSubmit} type="submit">
-              Filled out both place and keyword!
-            </Button>
-          </div>
+          <Button onClick={this.handleSubmit} type="submit">
+            Filled out both place and keyword!
+          </Button>
         </Footer>
       </div>
     );
