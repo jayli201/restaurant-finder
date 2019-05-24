@@ -15,28 +15,43 @@ class Restaurants extends Component {
       lat: 38.0293,
       lng: -78.4767,
       place: "",
-      keyword: ""
+      keyword: "",
+      zoom: 9
     };
   }
 
   handleSearch = data => {
+    // getting data from child component (Search)
     this.setState({
       allinfo: data
     });
-    this.updateMapPosition(
-      this.state.allinfo[0].info.locationlat,
-      this.state.allinfo[0].info.locationlng,
-      this.state.allinfo[0].info.place,
-      this.state.allinfo[0].info.keyword
-    );
+    // if there are no "keyword" restaurants in "place", update map to US
+    if (this.state.allinfo.length == 0) {
+      this.updateMapPosition(
+        37.0902,
+        -95.7129,
+        "the submitted place -> please reenter",
+        "error: no",
+        4
+      );
+    } else {
+      this.updateMapPosition(
+        this.state.allinfo[0].info.locationlat,
+        this.state.allinfo[0].info.locationlng,
+        this.state.allinfo[0].info.place,
+        this.state.allinfo[0].info.keyword,
+        10
+      );
+    }
   };
 
-  updateMapPosition = (lat, lng, place, keyword) => {
+  updateMapPosition = (lat, lng, place, keyword, zoom) => {
     this.setState({
       lat: lat,
       lng: lng,
       place: place,
-      keyword: keyword
+      keyword: keyword,
+      zoom: zoom
     });
   };
 
@@ -52,7 +67,9 @@ class Restaurants extends Component {
                   <PageHeader
                     style={{ background: "#fde3cf", textAlign: "center" }}
                     title={
-                      this.state.keyword + " restaurants in " + this.state.place
+                      this.state.keyword +
+                      " restaurants near " +
+                      this.state.place
                     }
                   />
                 </Col>
@@ -68,6 +85,7 @@ class Restaurants extends Component {
                       restaurants={this.state.allinfo}
                       lat={this.state.lat}
                       lng={this.state.lng}
+                      zoom={this.state.zoom}
                     />
                   </Affix>
                 </Col>

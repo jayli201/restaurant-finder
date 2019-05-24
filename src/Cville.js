@@ -13,14 +13,12 @@ var myIcon = L.icon({
 
 class Cville extends Component {
   render() {
-    // const position = [38.0293, -78.4767];
-    // const position = [this.props.lat, this.props.lng];
     return (
       <div>
         <Map
           className="map"
           center={[this.props.lat, this.props.lng]}
-          zoom={11}
+          zoom={this.props.zoom}
         >
           <TileLayer
             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a>'

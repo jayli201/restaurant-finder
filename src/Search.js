@@ -1,8 +1,10 @@
 import React, { Component } from "react";
+import { PageHeader, Row, Col, Input, Button, Layout } from "antd";
 import "./App.css";
 import axios from "axios";
 
 const API_KEY = process.env.REACT_APP_API_KEY;
+const { Content, Footer } = Layout;
 
 class Search extends Component {
   constructor() {
@@ -41,6 +43,7 @@ class Search extends Component {
   }
 
   componentDidMount() {
+    // first get lat and lng from inputted place
     axios
       .get(
         "https://cors-anywhere-hclaunch.herokuapp.com/https://maps.googleapis.com/maps/api/geocode/json?address=" +
@@ -52,16 +55,18 @@ class Search extends Component {
         const data = response.data.results;
         const locationlat = data[0].geometry.location.lat;
         const locationlng = data[0].geometry.location.lng;
+        // get lat and lng
         this.setState({
           locationlat: locationlat,
           locationlng: locationlng
         });
+        // then using the location's lat and lng, use the inputted keyword to get restaurant list
         return axios.get(
           "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +
             this.state.locationlat +
             "," +
             this.state.locationlng +
-            "&opennow&type=restaurant&radius=12000&name=" +
+            "&opennow&type=restaurant&radius=20000&name=" +
             this.state.keyword +
             "&key=" +
             API_KEY
@@ -83,8 +88,13 @@ class Search extends Component {
           long: long,
           address: addresses
         });
+        // sort ratings in descending order
+        this.state.ratings.sort(function(a, b) {
+          return b - a;
+        });
+        // organize the info into a large array
         const allinfo = [];
-        for (let i = 0; i < this.state.restaurants.length; i++) {
+        for (let i = 0; i < this.state.ratings.length; i++) {
           allinfo.push({
             name: restaurants[i],
             info: {
@@ -100,6 +110,7 @@ class Search extends Component {
             }
           });
         }
+        // change price level to $s
         for (let i = 0; i < allinfo.length; i++) {
           if (allinfo[i].info.price === undefined) {
             allinfo[i].info.price = "undefined";
@@ -122,35 +133,48 @@ class Search extends Component {
         });
         // to pass data from child to parent
         this.props.searchFill(this.state.allinfo);
+        console.log(this.state.allinfo);
+        this.state.allinfo.sort((a, b) => a.info.rating - b.info.rating);
+        console.log(this.state.allinfo);
       });
   }
 
   render() {
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Enter a place:{" "}
-            <input
-              type="text"
-              value={this.state.place}
-              onChange={this.handleLocationChange}
-            />
-          </label>
-          <div>
-            <label>
-              Enter a keyword:{" "}
-              <input
+        <PageHeader
+          style={{ background: "#fde3cf", textAlign: "center" }}
+          title="Search:"
+        />
+        <Content>
+          <Row gutter={18}>
+            <Col span={12}>
+              Enter a place:
+              <Input
                 type="text"
+                placeholder="place"
+                value={this.state.place}
+                onChange={this.handleLocationChange}
+              />
+            </Col>
+            <Col span={12}>
+              Enter a keyword:
+              <Input
+                type="text"
+                placeholder="keyword"
                 value={this.state.keyword}
                 onChange={this.handleKeyWordChange}
               />
-            </label>
-          </div>
+            </Col>
+          </Row>
+        </Content>
+        <Footer style={{ background: "#fde3cf", textAlign: "center" }}>
           <div>
-            <input type="submit" value="Filled out both place and keyword!" />
+            <Button onClick={this.handleSubmit} type="submit">
+              Filled out both place and keyword!
+            </Button>
           </div>
-        </form>
+        </Footer>
       </div>
     );
   }

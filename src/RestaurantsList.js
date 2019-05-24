@@ -3,17 +3,12 @@ import { Card, PageHeader } from "antd";
 import "./App.css";
 
 class RestaurantsList extends Component {
-  constructor() {
-    super();
-    this.state = {};
-  }
-
   render() {
     return (
       <div>
         <PageHeader
           style={{ background: "#fde3cf", textAlign: "center" }}
-          title="List of Restaurants:"
+          title="List of restaurants:"
         />
         {this.props.restaurants.map(restaurant => (
           <Card
