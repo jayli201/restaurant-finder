@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Cville from "./Cville.js";
 import Restaurants from "./Restaurants.js";
 import "./App.css";
 

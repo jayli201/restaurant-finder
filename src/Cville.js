@@ -13,10 +13,13 @@ var myIcon = L.icon({
 
 class Cville extends Component {
   render() {
-    const position = [38.0293, -78.4767];
     return (
       <div>
-        <Map className="map" center={position} zoom={13}>
+        <Map
+          className="map"
+          center={[this.props.lat, this.props.lng]}
+          zoom={this.props.zoom}
+        >
           <TileLayer
             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -30,6 +33,7 @@ class Cville extends Component {
                 <div>Name: {restaurant.name}</div>
                 <div>Price level: {restaurant.info.price}</div>
                 <div>Rating: {restaurant.info.rating}</div>
+                <div>Address: {restaurant.info.address}</div>
               </Popup>
             </Marker>
           ))}
