@@ -1,4 +1,4 @@
-## Restaurants in Charlottesville
+## Restaurant Finder
 
 ### Description:
 
