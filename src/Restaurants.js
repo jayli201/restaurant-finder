@@ -1,94 +1,86 @@
 import React, { Component } from "react";
-import axios from "axios";
+import Search from "./Search.js";
 import Cville from "./Cville.js";
+import RestaurantsList from "./RestaurantsList.js";
+import { Row, Col, PageHeader, Layout, Affix } from "antd";
 import "./App.css";
 
-const API_KEY = process.env.REACT_APP_API_KEY;
+const { Content, Footer } = Layout;
 
 class Restaurants extends Component {
   constructor() {
     super();
     this.state = {
-      restaurants: [],
-      prices: [],
-      ratings: [],
-      open: [],
-      lat: [],
-      long: [],
       allinfo: [],
-      allopen: []
+      lat: 38.0293,
+      lng: -78.4767,
+      place: "",
+      keyword: ""
     };
   }
 
-  componentDidMount() {
-    axios
-      .get(
-        "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=38.0293,-78.4767&radius=12000&type=restaurant&key=" +
-          API_KEY
-      )
-      .then(response => {
-        const data = response.data.results;
-        const restaurants = data.map(restaurant => restaurant.name);
-        const prices = data.map(restaurant => restaurant.price_level);
-        const ratings = data.map(restaurant => restaurant.rating);
-        const opening = data.map(
-          restaurant => restaurant.opening_hours.open_now
-        );
-        const lat = data.map(restaurant => restaurant.geometry.location.lat);
-        const long = data.map(restaurant => restaurant.geometry.location.lng);
+  handleSearch = data => {
+    this.setState({
+      allinfo: data
+    });
+    this.updateMapPosition(
+      this.state.allinfo[0].info.locationlat,
+      this.state.allinfo[0].info.locationlng,
+      this.state.allinfo[0].info.place,
+      this.state.allinfo[0].info.keyword
+    );
+  };
 
-        this.setState({
-          restaurants: restaurants,
-          prices: prices,
-          ratings: ratings,
-          open: opening,
-          lat: lat,
-          long: long
-        });
-
-        const allinfo = [];
-        for (let i = 0; i < this.state.restaurants.length; i++) {
-          allinfo.push({
-            name: this.state.restaurants[i],
-            info: {
-              price: prices[i],
-              rating: ratings[i],
-              open: opening[i],
-              latitude: lat[i],
-              longitude: long[i]
-            }
-          });
-        }
-
-        this.setState({
-          allinfo: allinfo
-        });
-
-        const allopen = [];
-        for (let i = 0; i < this.state.allinfo.length; i++) {
-          if (allinfo[i].info.open == true) {
-            allopen.push(allinfo[i]);
-          }
-        }
-
-        this.setState({
-          allopen: allopen
-        });
-      });
-  }
+  updateMapPosition = (lat, lng, place, keyword) => {
+    this.setState({
+      lat: lat,
+      lng: lng,
+      place: place,
+      keyword: keyword
+    });
+  };
 
   render() {
     return (
       <div>
-        {/* <div>
-          {this.state.allopen.map(restaurant => (
-            <li>
-              Name: {restaurant.name}, Rating: {restaurant.info.rating}, Price
-              level: {restaurant.info.price}
-            </li>
-          ))}
-        </div> */}
-        <Cville restaurants={this.state.allopen} />
+        <Layout className="layout">
+          <Content>
+            <div style={{ background: "#fde3cf", padding: 50, minHeight: 320 }}>
+              <Row>
+                <Col span={6} />
+                <Col span={12}>
+                  <PageHeader
+                    style={{ background: "#fde3cf", textAlign: "center" }}
+                    title={
+                      this.state.keyword + " restaurants in " + this.state.place
+                    }
+                  />
+                </Col>
+                <Col span={6} />
+              </Row>
+              <Row>
+                <Col span={6}>
+                  <RestaurantsList restaurants={this.state.allinfo} />
+                </Col>
+                <Col span={12}>
+                  <Affix offsetTop={this.state.top}>
+                    <Cville
+                      restaurants={this.state.allinfo}
+                      lat={this.state.lat}
+                      lng={this.state.lng}
+                    />
+                  </Affix>
+                </Col>
+                <Col span={6}>
+                  <Affix offsetTop={this.state.top}>
+                    <Search searchFill={this.handleSearch} />
+                  </Affix>
+                </Col>
+              </Row>
+              <Footer style={{ background: "#fde3cf" }} />
+            </div>
+          </Content>
+        </Layout>
       </div>
     );
   }
