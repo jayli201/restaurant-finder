@@ -10,6 +10,7 @@ The user inputs a _place_ and _keyword_, generating a visual of nearby restauran
 
 ### Tools:
 
+- Express package to build backend server for 2 different axios calls
 - Leaflet package to display map
 - Google Places API to get information about nearby open restaurants
 - Google Geocoding API to get coordinates of inputted place
