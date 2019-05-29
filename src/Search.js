@@ -43,9 +43,13 @@ class Search extends Component {
   }
 
   organizeInfo = () => {
+    // sort ratings in descending order
+    this.state.ratings.sort(function(a, b) {
+      return b - a;
+    });
     // organize the info into a large array
     const allinfo = [];
-    for (let i = 0; i < this.state.ratings.length; i++) {
+    for (let i = 0; i < this.state.restaurants.length; i++) {
       allinfo.push({
         name: this.state.restaurants[i],
         info: {
@@ -61,6 +65,7 @@ class Search extends Component {
         }
       });
     }
+    console.log(allinfo);
     // change price level to $s
     for (let i = 0; i < allinfo.length; i++) {
       if (allinfo[i].info.price === undefined) {
@@ -89,41 +94,31 @@ class Search extends Component {
   componentDidMount() {
     // first get lat and lng from inputted place
     axios
-      .get(
-        "https://cors-anywhere-hclaunch.herokuapp.com/https://maps.googleapis.com/maps/api/geocode/json?address=" +
-          this.state.place +
-          "&key=" +
-          API_KEY
-      )
+      .get("/geocode?address=" + this.state.place)
       .then(response => {
-        const data = response.data.results;
-        const locationlat = data[0].geometry.location.lat;
-        const locationlng = data[0].geometry.location.lng;
-        // get lat and lng
+        const lat = JSON.stringify(response.data.location.lat);
+        const lng = JSON.stringify(response.data.location.lng);
         this.setState({
-          locationlat: locationlat,
-          locationlng: locationlng
+          locationlat: lat,
+          locationlng: lng
         });
         // then using the location's lat and lng, use the inputted keyword to get restaurant list
         return axios.get(
-          "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +
+          "/restaurants?location=" +
             this.state.locationlat +
             "," +
             this.state.locationlng +
-            "&opennow&type=restaurant&radius=20000&name=" +
-            this.state.keyword +
-            "&key=" +
-            API_KEY
+            "&name=" +
+            this.state.keyword
         );
       })
       .then(response => {
-        const data = response.data.results;
-        const restaurants = data.map(restaurant => restaurant.name);
-        const prices = data.map(restaurant => restaurant.price_level);
-        const ratings = data.map(restaurant => restaurant.rating);
-        const lat = data.map(restaurant => restaurant.geometry.location.lat);
-        const long = data.map(restaurant => restaurant.geometry.location.lng);
-        const addresses = data.map(restaurant => restaurant.vicinity);
+        const restaurants = response.data.restaurants;
+        const prices = response.data.prices;
+        const ratings = response.data.ratings;
+        const lat = response.data.lat;
+        const long = response.data.long;
+        const addresses = response.data.addresses;
         this.setState({
           restaurants: restaurants,
           prices: prices,
@@ -132,10 +127,7 @@ class Search extends Component {
           long: long,
           address: addresses
         });
-        // sort ratings in descending order
-        this.state.ratings.sort(function(a, b) {
-          return b - a;
-        });
+        console.log(this.state.restaurants);
         this.organizeInfo();
       });
   }
